@@ -2,7 +2,6 @@ use super::{Fp, FpConfig};
 use crate::{
     biginteger::arithmetic as fa, BigInt, BigInteger, PrimeField, SqrtPrecomputation, Zero,
 };
-use ark_ff_macros::unroll_for_loops;
 use ark_std::marker::PhantomData;
 
 /// A trait that specifies the constants and arithmetic procedures
@@ -176,7 +175,6 @@ pub trait MontConfig<const N: usize>: 'static + Sync + Send + Sized {
     /// [here](https://hackmd.io/@gnark/modular_multiplication) if
     /// `Self::MODULUS` has (a) a non-zero MSB, and (b) at least one
     /// zero bit in the rest of the modulus.
-    #[unroll_for_loops(12)]
     #[inline(always)]
     fn mul_assign(a: &mut Fp<MontBackend<Self, N>, N>, b: &Fp<MontBackend<Self, N>, N>) {
         // No-carry optimisation applied to CIOS
@@ -246,7 +244,6 @@ pub trait MontConfig<const N: usize>: 'static + Sync + Send + Sized {
     }
 
     #[inline(always)]
-    #[unroll_for_loops(12)]
     fn square_in_place(a: &mut Fp<MontBackend<Self, N>, N>) {
         if N == 1 {
             // We default to multiplying with `a` using the `Mul` impl
@@ -390,8 +387,6 @@ pub trait MontConfig<const N: usize>: 'static + Sync + Send + Sized {
     }
 
     #[inline]
-    #[cfg_attr(not(target_family = "wasm"), unroll_for_loops(12))]
-    #[cfg_attr(target_family = "wasm", unroll_for_loops(6))]
     #[allow(clippy::modulo_one)]
     fn into_bigint(a: Fp<MontBackend<Self, N>, N>) -> BigInt<N> {
         let mut r = (a.0).0;
@@ -411,7 +406,6 @@ pub trait MontConfig<const N: usize>: 'static + Sync + Send + Sized {
         BigInt::new(r)
     }
 
-    #[unroll_for_loops(12)]
     fn sum_of_products<const M: usize>(
         a: &[Fp<MontBackend<Self, N>, N>; M],
         b: &[Fp<MontBackend<Self, N>, N>; M],
