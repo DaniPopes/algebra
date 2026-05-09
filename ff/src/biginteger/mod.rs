@@ -2,6 +2,7 @@ use crate::{
     bits::{BitIteratorBE, BitIteratorLE},
     const_for, UniformRand,
 };
+use ark_ff_macros::unroll_for_loops;
 use ark_serialize::{
     CanonicalDeserialize, CanonicalSerialize, Compress, SerializationError, Valid, Validate,
 };
@@ -330,6 +331,7 @@ impl<const N: usize> BigInt<N> {
 impl<const N: usize> BigInteger for BigInt<N> {
     const NUM_LIMBS: usize = N;
 
+    #[unroll_for_loops(6)]
     #[inline]
     fn add_with_carry(&mut self, other: &Self) -> bool {
         let mut carry = 0;
@@ -341,6 +343,7 @@ impl<const N: usize> BigInteger for BigInt<N> {
         carry != 0
     }
 
+    #[unroll_for_loops(6)]
     #[inline]
     fn sub_with_borrow(&mut self, other: &Self) -> bool {
         let mut borrow = 0;
@@ -589,6 +592,7 @@ impl<const N: usize> Display for BigInt<N> {
 
 impl<const N: usize> Ord for BigInt<N> {
     #[inline]
+    #[cfg_attr(target_arch = "x86_64", unroll_for_loops(12))]
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         use core::cmp::Ordering;
         #[cfg(target_arch = "x86_64")]
